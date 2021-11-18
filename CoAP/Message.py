@@ -31,4 +31,26 @@ class Message:
         self.token = token
         self.payload = payload
 
+    @classmethod
+    def decode_message(cls, message: bytes):
+        msg_version = (0xC0 & message[0]) >> 6
+        msg_type = (0x30 & message[0]) >> 4
+        msg_token_length = (0x0F & message[0]) >> 0
+        msg_class = (message[1] >> 5) & 0x07
+        msg_code = (message[1] >> 0) & 0x1F
+        msg_id = (message[2] << 8) | message[3]
+
+        if msg_version != 1:
+            print("Error")
+
+        if 9 <= msg_token_length <= 15:
+            print("Error")
+
+        token = 0
+
+        if msg_token_length:
+            token = message[4 + msg_token_length]
+
+        payload = message[5 + msg_token_length:].decode('utf-8')
+        return cls(payload, msg_type, msg_class, msg_code, msg_id, msg_token_length, msg_version=1, token=0)
 
