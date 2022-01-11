@@ -3,8 +3,10 @@ import threading
 
 import select
 
+from CoAP.Message import Message
 
 class Client:
+    Message = None
     client_socket = None
     ip = ""  # ip for client and server
     client_port = 0
@@ -15,16 +17,24 @@ class Client:
 
     @classmethod
     def __init__(cls):
-        cls.ip = "127.0.0.1"  # local ip both client and server have
+        cls.ip = "127.0.0.2"  # local ip both client and server have
+
+        # adresa ip de mai sus trebuie schimbata
+        # trebuie sa luam adresa ip din interfata, ca sa ne fie mai usor
+        # butoane pentru fiecare actiune(more or less)
+
         cls.client_port = 2000  # peer port
         cls.server_port = 2001  # my port
         cls.data = None
 
         cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        cls.client_socket.bind(("127.0.0.1", cls.client_port))
+        cls.client_socket.bind(("127.0.0.2", cls.client_port))
+        cls.client_message = Message('Client')
+
 
         cls.running = False
         cls.receive_thread = threading.Thread(target=cls.receive_fct, args=(cls.client_socket,))
+
     @classmethod
     def client_connect(cls):
         cls.running = True
@@ -39,7 +49,8 @@ class Client:
         cls.data = data
 
     @classmethod
-    def send_to_server(cls):
+    def send_to_server(cls, client_message=None):
+        my_message = Message('Client')
         try:
             cls.receive_thread = threading.Thread(target=cls.receive_fct)
             cls.receive_thread.start()
@@ -48,9 +59,11 @@ class Client:
             return
 
         while True:
-            data = cls.data
+            data = input("Trimite: ")
+            my_message.set_client_payload(client_message)
+            packed_data = my_message.encode_message
             if data is not None:
-                cls.client_socket.sendto(bytes(data, encoding="ascii"), (cls.ip, int(cls.client_port)))
+                cls.client_socket.sendto(bytes(str(packed_data), encoding="ascii"), (cls.ip, int(cls.client_port)))
                 cls.data = None
             if not cls.running:
                 print("Waiting for the thread to close.")
