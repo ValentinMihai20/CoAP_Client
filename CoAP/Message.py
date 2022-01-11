@@ -25,6 +25,7 @@ class CoAP:
     CODE_POST = 2
     CODE_RENAME = 8
 
+
 def unpack_helper(fmt, data):
     size = struct.calcsize(fmt)
     return struct.unpack(fmt, data[:size]), data[size:]
@@ -43,28 +44,30 @@ class Message:
         self.token = 0
         self.payload = {'command': 'Hello'}
 
-    def verify_message(self, message):
-        msg_version = (0xC0 & message[0]) >> 6
-        msg_type = (0x30 & message[0]) >> 4
-        msg_token_length = (0x0F & message[0]) >> 0
+    def verify_format(self, message, encoded_json):
+        if self.architecture_type == 'Server':
+            response = Message('Client')
 
-        msg_class = (message[1] >> 5) & 0b111
-        msg_code = (message[1] >> 0) & 0x1F
-        msg_id = (message[2] << 8) | message[3]
+    def decode_message(self, message, encoded_json):
+        self.msg_version = (0xC0 & message[0]) >> 6
+        self.msg_type = (0x30 & message[0]) >> 4
+        self.msg_token_length = (0x0F & message[0]) >> 0
 
-        if msg_version != CoAP.COAP_VERSION:
-            print("Error")
+        self.msg_class = (message[1] >> 5) & 0b111
+        self.msg_code = (message[1] >> 0) & 0x1F
 
-        if 9 <= msg_token_length <= 15:
-            print("Error")
+        self.msg_id = (message[2] << 8) | message[3]
 
-        token = 0
-        if msg_token_length:
-            token = message[4:4 + msg_token_length]
+        self.payload_marker = (message[3])
+        self.payload = encoded_json
+
+        self.token = 0
+        if self.msg_token_length:
+            self.token = message[4]
 
         # payload = message[5 + msg_token_length:].decode('utf-8')
 
-    def decode_message(self, message):
+    def get_header_message(self, message):
         header_format, encoded_json = unpack_helper('i i i i i i ', message)
         encoded_json = encoded_json.replace(b'\x00', b'')
         return header_format, encoded_json
@@ -103,13 +106,13 @@ class Message:
 
     def set_server_payload(self, command, response):
         if self.architecture_type == 'Server':
-            self.payload = {'command': command, 'data': response}
+            self.payload = {'command': command, 'response': response}
 
         # function for client only
 
-    def set_client_payload(self, command):
+    def set_client_payload(self, command, parameters):
         if self.architecture_type == 'Client':
-            self.payload = {'command': command}
+            self.payload = {'command': command, 'parameters': parameters}
 
     def get_version(self):
         return int(str(self.msg_version), 2)
@@ -140,4 +143,3 @@ class Message:
         print("MESSAGE ID: " + str(self.get_message_id()))
         print("Token: " + str(self.get_token()))
         print("Payload: " + str(self.get_payload()))
-

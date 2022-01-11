@@ -27,7 +27,7 @@ def process_data(cls, data, address):
     encoded_json - b'{"command": "hello"}'
     command - hello
     """
-    header_format, encoded_json = cls.Message.decode_message(data)
+    header_format, encoded_json = cls.Message.get_header_message(data)
     command = json.loads(encoded_json)['command']
     print(command)
 
@@ -42,13 +42,14 @@ def main():
     # server_socket = None
 
 
-    sport = 2001  # my port
-    dport = 2000  # peer port
-    dip = "127.0.0.1"  # peer ip
+    server_port = 2001  # my port
+    client_port = 2000  # peer port
+    server_ip = "127.0.0.1"  # peer ip
+    client_ip = "127.0.0.2"
 
     # Creare socket UDP
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    s.bind((dip, int(sport)))
+    s.bind((server_ip, int(server_port)))
 
     running = True
     try:
@@ -60,13 +61,10 @@ def main():
 
     while True:
         try:
-            # data = input("Trimite: ")
-            # my_message.set_server_payload(data)
-            # packed_data = my_message.encode_message()
-            # s.sendto(packed_data, (dip, int(sport)))
             data, address = s.recvfrom(1024)
             print("Received", str(data), "from", address)
-            process_data(data, address)
+            # process_data(data, address)
+            s.sendto(b"Mesaj", (client_ip, int(client_port)))
         except KeyboardInterrupt:
             running = False
             print("Waiting for the thread to close...")

@@ -5,10 +5,13 @@ import select
 
 from CoAP.Message import Message
 
+
 class Client:
-    Message = None
+    sent_message = None
+    received_message = None
     client_socket = None
-    ip = ""  # ip for client and server
+    client_ip = ""
+    server_ip = ""
     client_port = 0
     server_port = 0
     data = None
@@ -17,8 +20,10 @@ class Client:
 
     @classmethod
     def __init__(cls):
-        cls.ip = "127.0.0.2"  # local ip both client and server have
-
+        cls.sent_message = Message('Client')
+        cls.received_message = Message('Server')
+        cls.client_ip = "127.0.0.2"  # local ip both client and server have
+        cls.server_ip = "127.0.0.1"
         # adresa ip de mai sus trebuie schimbata
         # trebuie sa luam adresa ip din interfata, ca sa ne fie mai usor
         # butoane pentru fiecare actiune(more or less)
@@ -31,14 +36,14 @@ class Client:
         cls.client_socket.bind(("127.0.0.2", cls.client_port))
         cls.client_message = Message('Client')
 
-
         cls.running = False
         cls.receive_thread = threading.Thread(target=cls.receive_fct, args=(cls.client_socket,))
 
+        cls.send_to_server()
     @classmethod
     def client_connect(cls):
         cls.running = True
-        cls.send_to_server()
+
 
     @classmethod
     def client_disconnect(cls):
@@ -49,8 +54,7 @@ class Client:
         cls.data = data
 
     @classmethod
-    def send_to_server(cls, client_message=None):
-        my_message = Message('Client')
+    def send_to_server(cls):
         try:
             cls.receive_thread = threading.Thread(target=cls.receive_fct)
             cls.receive_thread.start()
@@ -59,11 +63,12 @@ class Client:
             return
 
         while True:
-            data = input("Trimite: ")
-            my_message.set_client_payload(client_message)
-            packed_data = my_message.encode_message
-            if data is not None:
-                cls.client_socket.sendto(bytes(str(packed_data), encoding="ascii"), (cls.ip, int(cls.client_port)))
+            command = input("Comanda: ")
+            parameters = input("Parametri: ")
+            cls.sent_message.set_client_payload(command, parameters)
+            packed_data = cls.sent_message.encode_message()
+            if command is not None:
+                cls.client_socket.sendto(packed_data, (cls.server_ip, int(cls.server_port)))
                 cls.data = None
             if not cls.running:
                 print("Waiting for the thread to close.")
@@ -84,3 +89,12 @@ class Client:
                 data, address = cls.client_socket.recvfrom(1024)
                 print("Received ", str(data), " from ", address)
                 print("Counter = ", counter)
+                cls.process_data(data,address)
+
+    @classmethod
+    def process_data(cls, data, address):
+        header_format, encoded_json = cls.received_message.get_header_message(data)
+
+        cls.received_message.decode_message(header_format, encoded_json)
+        # cls.received_message.verify din message.py
+
