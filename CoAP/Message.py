@@ -44,9 +44,66 @@ class Message:
         self.token = 0
         self.payload = {'command': 'Hello'}
 
+    def set_msg_version(self, msg_version):
+        self.msg_version = msg_version
+
+    def set_msg_type(self, msg_type):
+        self.msg_type = msg_type
+
+    def set_msg_token_length(self, msg_token_length):
+        self.msg_token_length = msg_token_length
+
+    def set_msg_class(self, msg_class):
+        self.msg_class = msg_class
+
+    def set_msg_code(self, msg_code):
+        self.msg_code = msg_code
+
+    def set_msg_id(self, msg_id):
+        self.msg_id = msg_id
+
+    def set_token(self, token):
+        self.token = token
+
+    def set_payload_marker(self, marker):
+        self.payload_marker = marker
+
+    def set_payload(self, payload):
+        self.payload = payload
+
     def verify_format(self, message, encoded_json):
         if self.architecture_type == 'Server':
             response = Message('Client')
+
+            response.set_msg_version(1)
+            response.set_msg_token_length(1)
+            response.set_msg_id(0xffff)
+            response.set_token(0)
+            response.set_payload_marker(0xff)
+
+            if self.msg_version != 1:
+                message = "Client Header Version Error"  # 500 Internal Server Error
+
+                response.set_msg_class(5)
+                response.set_msg_code(0)
+                response.set_msg_type(0)
+                response.set_payload_marker(0)
+                response.set_payload("")
+                return response
+
+            encoded_json = self.get_payload()
+            command = json.loads(encoded_json)['command']
+            raspuns = json.loads(encoded_json)['response']
+
+            print(command)
+            print(raspuns)
+
+            return response
+
+        else:
+            pass
+        # creeare mesaj raspuns server pentru tip ack si non-conf?
+
 
     def decode_message(self, message, encoded_json):
         self.msg_version = (0xC0 & message[0]) >> 6
