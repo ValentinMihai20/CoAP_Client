@@ -82,7 +82,7 @@ class Message:
             response.set_payload_marker(0xff)
 
             if self.msg_version != 1:
-                message = "Client Header Version Error"  # 500 Internal Server Error
+                message = "Server error"  # 500 Internal Server Error
 
                 response.set_msg_class(5)
                 response.set_msg_code(0)
@@ -90,6 +90,7 @@ class Message:
                 response.set_payload_marker(0)
                 response.set_payload("")
                 return response
+
 
             encoded_json = self.get_payload()
             command = json.loads(encoded_json)['command']

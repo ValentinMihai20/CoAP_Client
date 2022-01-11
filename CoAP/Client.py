@@ -89,16 +89,16 @@ class Client:
                 data, address = cls.client_socket.recvfrom(1024)
                 print("Received ", str(data), " from ", address)
                 print("Counter = ", counter)
-                cls.process_data(data, address)
+                cls.process_data(data)
                 print(data)
 
 
     @classmethod
-    def process_data(cls, data, address):
+    def process_data(cls, data):
         header_format, encoded_json = cls.received_message.get_header_message(data)
 
         cls.received_message.decode_message(header_format, encoded_json)
-        # cls.received_message.verify din message.py
+        # cls.sent_message.verify din message.py
         cls.sent_message = cls.received_message.verify_format()
         cls.data = cls.sent_message.encode_message()
 
