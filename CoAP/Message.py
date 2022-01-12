@@ -1,9 +1,10 @@
 import struct
 from struct import *
 import json
+import CoAP.Interface
 
 
-class CoAP:
+class CoAPFormat:
     COAP_PAYLOAD_MARKER = 0xff
     COAP_VERSION = 1
 
@@ -37,11 +38,11 @@ class Message:
         self.msg_version = 1
         self.msg_type = 1
         self.msg_token_length = 1
-        self.msg_class = 1
+        self.msg_class = 0
         self.msg_code = 1
         self.msg_id = 0xFFFF
-
         self.token = 0
+        self.payload_marker = 0xff
         self.payload = {'command': 'Hello', 'response': 'raspuns'}
 
     def set_msg_version(self, msg_version):
@@ -82,6 +83,12 @@ class Message:
             response.set_payload_marker(0xff)
 
             # de trimis un mesaj pt ack cu confirmare de primire
+            # credem ca e okay
+
+            if self.msg_type == 0:
+                response.set_payload("Da, am primit mesajul")
+                response.set_msg_type(2)
+                CoAP.Interface.BaseWindow.print_message("Da, am primit mesajul")
 
             if self.msg_version != 1:
                 message = "Server error"  # 500 Internal Server Error
@@ -90,8 +97,55 @@ class Message:
                 response.set_msg_code(0)
                 response.set_msg_type(0)
                 response.set_payload_marker(0)
-                response.set_payload("")
+                response.set_payload("Eroare de server!")
+                CoAP.Interface.BaseWindow.print_message("Eroare de server!")
                 return response
+
+            if self.msg_class == 5:
+                if self.msg_code == 1:
+                    message = "Not implemented!"
+
+                    response.set_msg_class(5)
+                    response.set_msg_code(0)
+                    response.set_msg_type(0)
+                    response.set_payload_marker(0)
+                    response.set_payload("Eroare Not implemented!")
+                    CoAP.Interface.BaseWindow.print_message("Eroare Not implemented!")
+                    return response
+
+                if self.msg_code == 2:
+                    message = "Bad Gateway!"
+
+                    response.set_msg_class(5)
+                    response.set_msg_code(0)
+                    response.set_msg_type(0)
+                    response.set_payload_marker(0)
+                    response.set_payload("Eroare Bad Gateway!")
+                    CoAP.Interface.BaseWindow.print_message("Eroare Bad Gateway!")
+                    return response
+
+                if self.msg_code == 3:
+                    message = "Service Unavailable!"
+
+                    response.set_msg_class(5)
+                    response.set_msg_code(0)
+                    response.set_msg_type(0)
+                    response.set_payload_marker(0)
+                    response.set_payload("Eroare Service Unavailable!")
+                    CoAP.Interface.BaseWindow.print_message("Eroare Service Unavailable!")
+
+                    return response
+
+                if self.msg_code == 4:
+                    message = "Gateway Timeout!"
+
+                    response.set_msg_class(5)
+                    response.set_msg_code(0)
+                    response.set_msg_type(0)
+                    response.set_payload_marker(0)
+                    response.set_payload("Eroare Gateway Timeout!")
+                    CoAP.Interface.BaseWindow.print_message("Eroare Gateway Timeout!")
+                    return response
 
             encoded_json = self.get_payload()
             command = json.loads(encoded_json)['command']
@@ -145,7 +199,7 @@ class Message:
         message.append(0xFFFFFFFFFFFFFFFF & self.token)
 
         # urmatorul octet
-        message.append(0xFF & CoAP.COAP_PAYLOAD_MARKER)
+        message.append(0xFF & CoAPFormat.COAP_PAYLOAD_MARKER)
 
         # urmatorii 0-4 octeti
         message.append(self.payload)  # message[6]

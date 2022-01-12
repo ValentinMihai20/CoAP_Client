@@ -1,6 +1,7 @@
-from CoAP.Interface import Base_Window
-#from UI.Interface import Connect_Window
+import CoAP.Interface
+
+
 if __name__ == '__main__':
-    app = Base_Window()
+    CoAP.Interface.BaseWindow().start_application()
 
 

@@ -3,7 +3,7 @@ import threading
 
 import select
 
-from CoAP.Message import Message
+import CoAP.Message
 
 
 class Client:
@@ -25,8 +25,8 @@ class Client:
 
     @classmethod
     def __init__(cls):
-        cls.sent_message = Message('Client')
-        cls.received_message = Message('Server')
+        cls.sent_message = CoAP.Message.Message('Client')
+        cls.received_message = CoAP.Message.Message('Server')
         cls.client_ip = "127.0.0.2"  # local ip both client and server have
         cls.server_ip = "127.0.0.1"
         # adresa ip de mai sus trebuie schimbata
@@ -39,7 +39,7 @@ class Client:
 
         cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         cls.client_socket.bind(("127.0.0.2", cls.client_port))
-        cls.client_message = Message('Client')
+        cls.client_message = CoAP.Message.Message('Client')
 
         cls.running = False
         cls.receive_thread = threading.Thread(target=cls.receive_fct, args=(cls.client_socket,))
@@ -69,8 +69,6 @@ class Client:
             return
 
         if True:
-            command = command
-            parameters = parameters
             cls.sent_message.set_client_payload(command, parameters)
             packed_data = cls.sent_message.encode_message()
             if command is not None:
