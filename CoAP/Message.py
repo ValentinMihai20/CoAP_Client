@@ -42,7 +42,7 @@ class Message:
         self.msg_id = 0xFFFF
 
         self.token = 0
-        self.payload = {'command': 'Hello'}
+        self.payload = {'command': 'Hello', 'response': 'raspuns'}
 
     def set_msg_version(self, msg_version):
         self.msg_version = msg_version
@@ -71,7 +71,7 @@ class Message:
     def set_payload(self, payload):
         self.payload = payload
 
-    def verify_format(self, message, encoded_json):
+    def verify_format(self):
         if self.architecture_type == 'Server':
             response = Message('Client')
 
@@ -80,6 +80,8 @@ class Message:
             response.set_msg_id(0xffff)
             response.set_token(0)
             response.set_payload_marker(0xff)
+
+            # de trimis un mesaj pt ack cu confirmare de primire
 
             if self.msg_version != 1:
                 message = "Server error"  # 500 Internal Server Error
@@ -90,7 +92,6 @@ class Message:
                 response.set_payload_marker(0)
                 response.set_payload("")
                 return response
-
 
             encoded_json = self.get_payload()
             command = json.loads(encoded_json)['command']
@@ -104,7 +105,6 @@ class Message:
         else:
             pass
         # creeare mesaj raspuns server pentru tip ack si non-conf?
-
 
     def decode_message(self, message, encoded_json):
         self.msg_version = (0xC0 & message[0]) >> 6

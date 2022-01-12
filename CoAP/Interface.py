@@ -1,7 +1,7 @@
 from tkinter import *
-import CoAP.Client as client
 import threading
 
+import CoAP.Client as client
 
 class Base_Window:
     thread = threading.Thread(target=client.Client.client_connect)
@@ -15,13 +15,13 @@ class Base_Window:
         self.button_disconnect = Button(self.window, height=3, width=14, text="Disconnect", font="arial 15 bold",
                                         bg="#ff0000", command=self.close_client)
         self.button_confirmable = Button(self.window, height=3, width=14, text="Confirmable",
-                                             font="arial 15 bold", bg="#98fb98", command=self.conf)
+                                         font="arial 15 bold", bg="#98fb98", command=self.conf)
         self.button_non_confirmable = Button(self.window, height=3, width=14, text="Non-Confirmable",
                                              font="arial 15 bold", bg="#98fb98", command=self.non_conf)
         self.button_acknowledgement = Button(self.window, height=3, width=14, text="Acknowledgement",
                                              font="arial 15 bold", bg="#98fb98", command=self.ack_press)
         self.button_reset = Button(self.window, height=3, width=14, text="Reset",
-                                         font="arial 15 bold", bg="#98fb98", command=self.reset)
+                                   font="arial 15 bold", bg="#98fb98", command=self.reset)
         self.button_clearScreen = Button(self.window, height=3, width=14, text="Clear Screen", font="arial 15 bold",
                                          bg="#98fb98", command=self.clear_screen)
         self.button_exit = Button(self.window, height=3, width=14, text="Exit", font="arial 15 bold", bg="#98fb98",
@@ -66,7 +66,6 @@ class Base_Window:
         self.button_confirmable.place(x=531, y=100)
         self.print_message("Using confirmable")
 
-
     def start_client(self):
         client.Client.__init__()
         self.__class__.thread = threading.Thread(target=client.Client.client_connect)
@@ -98,6 +97,14 @@ class Base_Window:
 
     def send_message(self):
         self.text_box2.config(state=NORMAL)
+        input = self.text_box2.get("1.0", END)
+        rezultat = input.split(" ", 1)
+        if rezultat[0] not in ("cwd", "ls", "mkdir", "rename"):
+            self.print_message("Introduceti o comanda valida")
+        client.Client.send_to_server(rezultat[0], rezultat[1])
+        print(rezultat[0])
+        print(rezultat[1])
+
         self.text_box2.delete(1.0, "end")
 
 

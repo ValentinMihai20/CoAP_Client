@@ -7,7 +7,12 @@ from CoAP.Message import Message
 
 
 class Client:
-    sent_message = None
+    '''
+    sent_message = Message('Client')
+    client_port = 2000
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    client_socket.bind(("127.0.0.2", client_port))
+    '''
     received_message = None
     client_socket = None
     client_ip = ""
@@ -39,10 +44,11 @@ class Client:
         cls.running = False
         cls.receive_thread = threading.Thread(target=cls.receive_fct, args=(cls.client_socket,))
 
-        cls.send_to_server()
+
     @classmethod
     def client_connect(cls):
         cls.running = True
+        #cls.send_to_server()
 
 
     @classmethod
@@ -54,7 +60,7 @@ class Client:
         cls.data = data
 
     @classmethod
-    def send_to_server(cls):
+    def send_to_server(cls, command, parameters):
         try:
             cls.receive_thread = threading.Thread(target=cls.receive_fct)
             cls.receive_thread.start()
@@ -62,9 +68,9 @@ class Client:
             print("Error at starting the thread!")
             return
 
-        while True:
-            command = input("Comanda: ")
-            parameters = input("Parametri: ")
+        if True:
+            command = command
+            parameters = parameters
             cls.sent_message.set_client_payload(command, parameters)
             packed_data = cls.sent_message.encode_message()
             if command is not None:
@@ -74,7 +80,7 @@ class Client:
                 print("Waiting for the thread to close.")
                 cls.receive_thread.join()
                 print("Thread receive_thread closed.")
-                break
+               # break
 
     @classmethod
     def receive_fct(cls):
@@ -101,4 +107,3 @@ class Client:
         # cls.sent_message.verify din message.py
         cls.sent_message = cls.received_message.verify_format()
         cls.data = cls.sent_message.encode_message()
-
