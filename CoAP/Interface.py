@@ -130,12 +130,24 @@ class BaseWindow:
         for x in range(1, len(rezultat)):
             new_str = new_str + rezultat[x] + " "
 
-        if rezultat[0] not in ("cwd", "ls", "mkdir", "rename"):
-            cls.print_message("Introduceti o comanda valida")
+        if rezultat[0] not in ("chdir", "cwd", "newDir", "newFile", "ls", "rename", "move"):
+            cls.print_message("Introduceti o comanda valida!!")
 
         # settere pentru cls.response_message
+        if rezultat[0] in ['cwd', 'ls']:
+            cls.response_message.set_msg_class(0)
+            cls.response_message.set_msg_code(1)
+        elif rezultat[0] in ['newDir', 'newFile']:
+            cls.response_message.set_msg_class(0)
+            cls.response_message.set_msg_code(2)
+        elif rezultat[0] == ['move']:            #   +chdir?
+            cls.response_message.set_msg_class(0)
+            cls.response_message.set_msg_code(3)
+        elif rezultat[0] == ['rename']:
+            cls.response_message.set_msg_class(0)
+            cls.response_message.set_msg_code(8)
 
-        cls.response_message.send_to_server(rezultat[0], new_str)
+        cls.response_message.send_to_server(rezultat[0], new_str, cls.response_message)
 
         cls.text_box2.delete(1.0, "end")
 

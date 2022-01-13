@@ -2,6 +2,7 @@ import struct
 from struct import *
 import json
 import CoAP.Interface
+import CoAP.Client
 
 
 class CoAPFormat:
@@ -86,8 +87,12 @@ class Message:
             # credem ca e okay
 
             if self.msg_type == 0:
-                response.set_payload("Da, am primit mesajul")
+                #response.set_client_payload("Da, am primit mesajul","")
                 response.set_msg_type(2)
+                response.set_msg_class(0)
+                response.set_msg_code(0)
+                response.set_payload_marker(0)
+                CoAP.Client.Client.send_to_server("Da, am primit mesajul", "", response)
                 CoAP.Interface.BaseWindow.print_message("Da, am primit mesajul")
 
             if self.msg_version != 1:
@@ -97,8 +102,8 @@ class Message:
                 response.set_msg_code(0)
                 response.set_msg_type(0)
                 response.set_payload_marker(0)
-                response.set_payload("Eroare de server!")
-                CoAP.Interface.BaseWindow.print_message("Eroare de server!")
+                response.set_payload("500 Internal Server Error!")
+                CoAP.Interface.BaseWindow.print_message("500 Internal Server Error!")
                 return response
 
             if self.msg_class == 5:
@@ -109,8 +114,8 @@ class Message:
                     response.set_msg_code(0)
                     response.set_msg_type(0)
                     response.set_payload_marker(0)
-                    response.set_payload("Eroare Not implemented!")
-                    CoAP.Interface.BaseWindow.print_message("Eroare Not implemented!")
+                    response.set_payload("501 Not implemented!")
+                    CoAP.Interface.BaseWindow.print_message("501 Not implemented!")
                     return response
 
                 if self.msg_code == 2:
@@ -120,8 +125,8 @@ class Message:
                     response.set_msg_code(0)
                     response.set_msg_type(0)
                     response.set_payload_marker(0)
-                    response.set_payload("Eroare Bad Gateway!")
-                    CoAP.Interface.BaseWindow.print_message("Eroare Bad Gateway!")
+                    response.set_payload("502 Bad Gateway!")
+                    CoAP.Interface.BaseWindow.print_message("502 Bad Gateway!")
                     return response
 
                 if self.msg_code == 3:
@@ -131,8 +136,8 @@ class Message:
                     response.set_msg_code(0)
                     response.set_msg_type(0)
                     response.set_payload_marker(0)
-                    response.set_payload("Eroare Service Unavailable!")
-                    CoAP.Interface.BaseWindow.print_message("Eroare Service Unavailable!")
+                    response.set_payload("503 Service Unavailable!")
+                    CoAP.Interface.BaseWindow.print_message("503 Service Unavailable!")
 
                     return response
 
@@ -143,8 +148,8 @@ class Message:
                     response.set_msg_code(0)
                     response.set_msg_type(0)
                     response.set_payload_marker(0)
-                    response.set_payload("Eroare Gateway Timeout!")
-                    CoAP.Interface.BaseWindow.print_message("Eroare Gateway Timeout!")
+                    response.set_payload("504 Gateway Timeout!")
+                    CoAP.Interface.BaseWindow.print_message("504 Gateway Timeout!")
                     return response
 
             encoded_json = self.get_payload()
@@ -247,11 +252,4 @@ class Message:
     def get_payload(self):
         return self.payload
 
-    def print_details(self):
-        print("We are printing the message format...")
-        print("VERSION: " + str(self.get_version()))
-        print("TYPE: " + str(self.get_type()))
-        print("CLASS.CODE: " + (str(self.get_class()) + "." + str(self.get_code())))
-        print("MESSAGE ID: " + str(self.get_message_id()))
-        print("Token: " + str(self.get_token()))
-        print("Payload: " + str(self.get_payload()))
+

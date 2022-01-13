@@ -60,7 +60,7 @@ class Client:
         cls.data = data
 
     @classmethod
-    def send_to_server(cls, command, parameters):
+    def send_to_server(cls, command, parameters, sent_message):
         try:
             cls.receive_thread = threading.Thread(target=cls.receive_fct)
             cls.receive_thread.start()
@@ -69,8 +69,8 @@ class Client:
             return
 
         if True:
-            cls.sent_message.set_client_payload(command, parameters)
-            packed_data = cls.sent_message.encode_message()
+            sent_message.set_client_payload(command, parameters)
+            packed_data = sent_message.encode_message()
             if command is not None:
                 cls.client_socket.sendto(packed_data, (cls.server_ip, int(cls.server_port)))
                 cls.data = None
