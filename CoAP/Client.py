@@ -32,9 +32,6 @@ class Client:
 
         cls.client_ip = CoAP.Interface.BaseWindow.client_ip
         cls.server_ip = CoAP.Interface.BaseWindow.server_ip
-        # adresa ip de mai sus trebuie schimbata
-        # trebuie sa luam adresa ip din interfata, ca sa ne fie mai usor
-        # butoane pentru fiecare actiune(more or less)
 
         cls.client_port = CoAP.Interface.BaseWindow.client_port
         cls.server_port = CoAP.Interface.BaseWindow.server_port
@@ -51,8 +48,6 @@ class Client:
     @classmethod
     def client_connect(cls):
         cls.running = True
-        #cls.send_to_server()
-
 
     @classmethod
     def client_disconnect(cls):

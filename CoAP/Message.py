@@ -86,8 +86,31 @@ class Message:
         if self.architecture_type == 'Server':
             response = Message('Client')
 
-            # de trimis un mesaj pt ack cu confirmare de primire
-            # credem ca e okay
+            # verificari esentiale
+            if self.msg_version != 1:
+
+                response.set_msg_type(3)
+                response.set_msg_class(5)
+                response.set_msg_code(0)
+
+                response.set_payload_marker(0)
+                response.set_server_payload("", "")
+                CoAP.Interface.BaseWindow.print_message("500 Internal Server Error!")
+                return response
+
+            if 9 <= self.msg_token_length <= 15:
+                message = f"#500 Internal Server Error - Server Formatting Error - Token Length"
+                CoAP.Interface.BaseWindow.print_message(message)
+
+                response.set_msg_type(3)
+                response.set_msg_class(4)
+                response.set_msg_code(0)
+
+                response.set_payload_marker(0)
+                response.set_server_payload("", "")
+                return response
+
+            # afisare eroare in caz de primimi reset de la server
 
             if self.msg_type == 3:
                 if self.msg_class == 4:
@@ -107,33 +130,28 @@ class Message:
                         CoAP.Interface.BaseWindow.print_message("Eroare de client!")
                         CoAP.Interface.BaseWindow.print_message("406 Not Acceptable !")
 
+            # daca primesc acknowledgeable
+            if self.msg_type == 2:
+                CoAP.Interface.BaseWindow.print_message("Am primit Ack")
+
+            # daca primesc confirmable
             if self.msg_type == 0:
-                #response.set_client_payload("Da, am primit mesajul","")
                 response.set_msg_type(2)
                 response.set_msg_class(0)
                 response.set_msg_code(0)
                 response.set_payload_marker(0)
                 CoAP.Client.Client.send_to_server("", "", response)
                 CoAP.Interface.BaseWindow.print_message("Da, am primit mesajul")
-
-            if self.msg_version != 1:
-                message = "Server error"  # 500 Internal Server Error
-
-                response.set_msg_class(5)
-                response.set_msg_code(0)
-                response.set_msg_type(0)
-                response.set_payload_marker(0)
-                response.set_payload("500 Internal Server Error!")
-                CoAP.Interface.BaseWindow.print_message("500 Internal Server Error!")
                 return response
 
+            # erori de server! ->nu stiu daca/cate trebuie sa am
             if self.msg_class == 5:
                 if self.msg_code == 1:
                     message = "Not implemented!"
 
                     response.set_msg_class(5)
                     response.set_msg_code(0)
-                    response.set_msg_type(0)
+                    response.set_msg_type(3)
                     response.set_payload_marker(0)
                     response.set_payload("501 Not implemented!")
                     CoAP.Interface.BaseWindow.print_message("501 Not implemented!")
@@ -144,7 +162,7 @@ class Message:
 
                     response.set_msg_class(5)
                     response.set_msg_code(0)
-                    response.set_msg_type(0)
+                    response.set_msg_type(3)
                     response.set_payload_marker(0)
                     response.set_payload("502 Bad Gateway!")
                     CoAP.Interface.BaseWindow.print_message("502 Bad Gateway!")
@@ -155,7 +173,7 @@ class Message:
 
                     response.set_msg_class(5)
                     response.set_msg_code(0)
-                    response.set_msg_type(0)
+                    response.set_msg_type(3)
                     response.set_payload_marker(0)
                     response.set_payload("503 Service Unavailable!")
                     CoAP.Interface.BaseWindow.print_message("503 Service Unavailable!")
@@ -167,11 +185,13 @@ class Message:
 
                     response.set_msg_class(5)
                     response.set_msg_code(0)
-                    response.set_msg_type(0)
+                    response.set_msg_type(3)
                     response.set_payload_marker(0)
                     response.set_payload("504 Gateway Timeout!")
                     CoAP.Interface.BaseWindow.print_message("504 Gateway Timeout!")
                     return response
+
+            # raspuns default
 
             response.set_msg_version(1)
             response.set_msg_token_length(1)

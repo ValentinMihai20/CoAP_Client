@@ -170,7 +170,7 @@ class BaseWindow:
         for x in range(1, len(rezultat)):
             new_str = new_str + rezultat[x] + " "
 
-        if rezultat[0] not in ("","chdir", "cwd", "newDir", "newFile", "ls", "rename", "move"):
+        if rezultat[0] not in ("", "chdir", "cwd", "newDir", "newFile", "ls", "rename", "move"):
             cls.print_message("Introduceti o comanda valida!!")
 
         # settere pentru cls.response_message
