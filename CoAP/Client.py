@@ -7,13 +7,8 @@ import select
 import CoAP.Message
 import CoAP.Interface
 
+
 class Client:
-    '''
-    sent_message = Message('Client')
-    client_port = 2000
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    client_socket.bind(("127.0.0.2", client_port))
-    '''
     received_message = None
     sent_message = None
     client_socket = None
@@ -44,7 +39,6 @@ class Client:
         cls.running = False
         cls.receive_thread = threading.Thread(target=cls.receive_fct, args=(cls.client_socket,))
 
-
     @classmethod
     def client_connect(cls):
         cls.running = True
@@ -65,7 +59,7 @@ class Client:
         except:
             print("Error at starting the thread!")
             return
-
+        # while True:
         if True:
             sent_message.set_client_payload(command, parameters)
             packed_data = sent_message.encode_message()
@@ -76,14 +70,13 @@ class Client:
                 print("Waiting for the thread to close.")
                 cls.receive_thread.join()
                 print("Thread receive_thread closed.")
-               # break
+            # break
 
     @classmethod
     def receive_fct(cls):
         counter = 0
         while cls.running:
-            # Apelam la functia sistem IO -select- pentru a verifca daca socket-ul are date in bufferul de receptie
-            # Stabilim un timeout de 1 secunda
+
             r, _, _ = select.select([cls.client_socket], [], [], 1)
             if not r:
                 counter = counter + 1
@@ -95,7 +88,6 @@ class Client:
 
                 print(data)
 
-
     @classmethod
     def process_data(cls, data):
         cls.received_message = CoAP.Message.Message('Server')
@@ -104,9 +96,5 @@ class Client:
         print(header_format, encoded_json)
         cls.received_message.decode_message(header_format, encoded_json)
 
-        # cls.sent_message.verify din message.py
         cls.sent_message = cls.received_message.verify_format()
         cls.data = cls.sent_message.encode_message()
-
-
-

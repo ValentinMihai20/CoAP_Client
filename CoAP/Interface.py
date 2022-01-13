@@ -145,12 +145,12 @@ class BaseWindow:
         cls.button_disconnect.place(x=531, y=45)
 
         cls.print_message("Connected to the server!")
-        cls.print_comenzi("\tComenzi disponibile:")
+        cls.print_comenzi("\tAvailable commands:")
         cls.print_comenzi("- ls")
         cls.print_comenzi("- cwd")
         cls.print_comenzi("- newDir dirName")
         cls.print_comenzi("- newFile fileName")
-        #cls.print_comenzi("- move fileName newLocation")
+        cls.print_comenzi("- move newLocation fileName -> You have to be in the directory where 'fileName' is")
         cls.print_comenzi("- delete name")
         cls.print_comenzi("- rename oldName newName")
 
@@ -181,27 +181,34 @@ class BaseWindow:
         rezultat = " ".join(keyboard_input.split())
         rezultat = rezultat.split(" ")
         new_str = ""
+        if len(rezultat) == 1:
+            pass
+        else:
+            for x in range(1, len(rezultat)-1):
+                new_str = new_str + rezultat[x] + " "
+            new_str = new_str + rezultat[len(rezultat)-1]
+            #print("c"+new_str+"c")
 
-        for x in range(1, len(rezultat)):
-            new_str = new_str + rezultat[x] + " "
-
-        if rezultat[0] not in ("", "chdir", "cwd", "newDir", "newFile", "ls", "rename", "move"):
+        if rezultat[0] not in ("", "chdir", "cwd", "newDir", "newFile", "ls", "rename", "move", "delete"):
             cls.print_message("Introduceti o comanda valida!!")
 
         # settere pentru cls.response_message
         if rezultat[0] in ['cwd', 'ls']:
             cls.response_message.set_msg_class(0)
             cls.response_message.set_msg_code(1)
-        elif rezultat[0] in ['newDir', 'newFile']:
+        elif rezultat[0] in ['newDir', 'newFile', 'chdir']:
             cls.response_message.set_msg_class(0)
             cls.response_message.set_msg_code(2)
-        elif rezultat[0] == ['move']:            #   +chdir?
+        elif rezultat[0] == 'move':
             cls.response_message.set_msg_class(0)
             cls.response_message.set_msg_code(3)
-        elif rezultat[0] == ['rename']:
+        elif rezultat[0] == 'delete':
+            cls.response_message.set_msg_class(0)
+            cls.response_message.set_msg_code(4)
+        elif rezultat[0] == 'rename':
             cls.response_message.set_msg_class(0)
             cls.response_message.set_msg_code(8)
-        elif rezultat[0] == ['']:
+        elif rezultat[0] == '':
             cls.response_message.set_msg_class(0)
             cls.response_message.set_msg_code(0)
             cls.response_message.set_payload_marker(0)

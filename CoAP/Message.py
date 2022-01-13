@@ -88,7 +88,6 @@ class Message:
 
             # verificari esentiale
             if self.msg_version != 1:
-
                 response.set_msg_type(3)
                 response.set_msg_class(5)
                 response.set_msg_code(0)
@@ -111,24 +110,25 @@ class Message:
                 return response
 
             # afisare eroare in caz de primimi reset de la server
-
+            self.print_details()
             if self.msg_type == 3:
-                if self.msg_class == 4:
-                    if self.msg_code == 0:
-                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
-                        CoAP.Interface.BaseWindow.print_message("400 Bad request !")
-                    if self.msg_code == 3:
-                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
-                        CoAP.Interface.BaseWindow.print_message("403 Forbidden !")
-                    if self.msg_code == 4:
-                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
-                        CoAP.Interface.BaseWindow.print_message("404 Not Found !")
-                    if self.msg_code == 5:
-                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
-                        CoAP.Interface.BaseWindow.print_message("405 Method Not Allowed!")
-                    if self.msg_code == 6:
-                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
-                        CoAP.Interface.BaseWindow.print_message("406 Not Acceptable !")
+                if self.payload_marker == 0:
+                    if self.msg_class == 4:
+                        if self.msg_code == 0:
+                            CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                            CoAP.Interface.BaseWindow.print_message("400 Bad request !")
+                        if self.msg_code == 3:
+                            CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                            CoAP.Interface.BaseWindow.print_message("403 Forbidden !")
+                        if self.msg_code == 4:
+                            CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                            CoAP.Interface.BaseWindow.print_message("404 Not Found !")
+                        if self.msg_code == 5:
+                            CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                            CoAP.Interface.BaseWindow.print_message("405 Method Not Allowed!")
+                        if self.msg_code == 6:
+                            CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                            CoAP.Interface.BaseWindow.print_message("406 Not Acceptable !")
 
             # daca primesc acknowledgeable
             if self.msg_type == 2:
@@ -191,14 +191,6 @@ class Message:
                     CoAP.Interface.BaseWindow.print_message("504 Gateway Timeout!")
                     return response
 
-            # raspuns default
-
-            response.set_msg_version(1)
-            response.set_msg_token_length(1)
-            response.set_msg_id(0xffff)
-            response.set_token(0)
-            response.set_payload_marker(0xff)
-
             encoded_json = self.get_payload()
             command = json.loads(encoded_json)['command']
             raspuns = json.loads(encoded_json)['response']
@@ -210,7 +202,6 @@ class Message:
 
         else:
             pass
-        # creeare mesaj raspuns server pentru tip ack si non-conf?
 
     def decode_message(self, message, encoded_json):
         self.msg_version = (0xC0 & message[0]) >> 6
@@ -229,8 +220,6 @@ class Message:
         if self.msg_token_length:
             self.token = message[4]
 
-        # payload = message[5 + msg_token_length:].decode('utf-8')
-
     def get_header_message(self, message):
         header_format, encoded_json = unpack_helper('i i i i i i ', message)
         encoded_json = encoded_json.replace(b'\x00', b'')
@@ -242,7 +231,7 @@ class Message:
         message[0] |= ((self.msg_type & 0b11) << 4)
         message[0] |= (self.msg_token_length & 0x0F)
 
-        message.append((self.msg_class & 0b11) << 5)
+        message.append((self.msg_class & 0b111) << 5)
         message[1] |= (self.msg_code & 0x1F)
 
         message.append(self.msg_id >> 8)
