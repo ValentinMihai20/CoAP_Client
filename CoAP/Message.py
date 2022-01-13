@@ -222,7 +222,7 @@ class Message:
 
         self.msg_id = (message[2] << 8) | message[3]
 
-        self.payload_marker = (message[3])
+        self.payload_marker = (message[5])
         self.payload = encoded_json
 
         self.token = 0

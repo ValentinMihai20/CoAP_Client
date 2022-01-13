@@ -25,6 +25,7 @@ class BaseWindow:
     server_port = None
     client_ip = None
     client_port = None
+    text_server = None
 
     @classmethod
     def __init__(cls):
@@ -55,9 +56,10 @@ class BaseWindow:
         cls.text_box = Text(cls.window, height=24, width=75, font="arial 10", bg="#eeeeee")
         cls.text_box.config(state=DISABLED)
         cls.text_box2 = Text(cls.window, height=5, width=75, font="arial 10", bg="#eeeeee")
-        cls.text_box_connect_server = Text(cls.window, height=1, width=25,font="arial 10", bg="#eeeeee")
-        cls.text_box_connect_client = Text(cls.window, height=1, width=25,font="arial 10", bg="#eeeeee")
-
+        cls.text_box_connect_server = Text(cls.window, height=1, width=13,font="arial 10", bg="#eeeeee")
+        cls.text_box_connect_client = Text(cls.window, height=1, width=13,font="arial 10", bg="#eeeeee")
+        cls.text_server = Label(cls.window, text = "Server").place(x = 531, y = 1)
+        cls.text_client = Label(cls.window, text="Client").place(x=531, y=23)
     @classmethod
     def start_application(cls):
         cls.window.wm_title('Browser CoAP')
@@ -70,17 +72,22 @@ class BaseWindow:
         cls.button_send.place(x=531, y=410)
         cls.text_box.place(x=0, y=0)
         cls.text_box2.place(x=0, y=400)
-        cls.text_box_connect_server.place(x=531, y=1)
-        cls.text_box_connect_client.place(x=531, y=23)
+        cls.text_box_connect_server.place(x=613, y=1)
+        cls.text_box_connect_client.place(x=613, y=23)
         cls.text_box_connect_server.insert(1.0, "127.0.0.1:2001")
         cls.text_box_connect_client.insert(1.0, "127.0.0.2:2000")
-
         cls.window.mainloop()
 
     @classmethod
     def print_message(cls, message):
         cls.text_box.config(state=NORMAL)
         cls.text_box.insert(END, ">> " + message + "\n")
+        cls.text_box.config(state=DISABLED)
+
+    @classmethod
+    def print_comenzi(cls, message):
+        cls.text_box.config(state=NORMAL)
+        cls.text_box.insert(END, "" + message + "\n")
         cls.text_box.config(state=DISABLED)
 
     @classmethod
@@ -138,6 +145,14 @@ class BaseWindow:
         cls.button_disconnect.place(x=531, y=45)
 
         cls.print_message("Connected to the server!")
+        cls.print_comenzi("\tComenzi disponibile:")
+        cls.print_comenzi("- ls")
+        cls.print_comenzi("- cwd")
+        cls.print_comenzi("- newDir dirName")
+        cls.print_comenzi("- newFile fileName")
+        #cls.print_comenzi("- move fileName newLocation")
+        cls.print_comenzi("- delete name")
+        cls.print_comenzi("- rename oldName newName")
 
     @classmethod
     def close_client(cls):
