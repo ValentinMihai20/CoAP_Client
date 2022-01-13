@@ -1,10 +1,11 @@
 import socket
 import threading
+import json
 
 import select
 
 import CoAP.Message
-
+import CoAP.Interface
 
 class Client:
     '''
@@ -14,6 +15,7 @@ class Client:
     client_socket.bind(("127.0.0.2", client_port))
     '''
     received_message = None
+    sent_message = None
     client_socket = None
     client_ip = ""
     server_ip = ""
@@ -27,18 +29,19 @@ class Client:
     def __init__(cls):
         cls.sent_message = CoAP.Message.Message('Client')
         cls.received_message = CoAP.Message.Message('Server')
-        cls.client_ip = "127.0.0.2"  # local ip both client and server have
-        cls.server_ip = "127.0.0.1"
+
+        cls.client_ip = CoAP.Interface.BaseWindow.client_ip
+        cls.server_ip = CoAP.Interface.BaseWindow.server_ip
         # adresa ip de mai sus trebuie schimbata
         # trebuie sa luam adresa ip din interfata, ca sa ne fie mai usor
         # butoane pentru fiecare actiune(more or less)
 
-        cls.client_port = 2000  # peer port
-        cls.server_port = 2001  # my port
+        cls.client_port = CoAP.Interface.BaseWindow.client_port
+        cls.server_port = CoAP.Interface.BaseWindow.server_port
         cls.data = None
 
         cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        cls.client_socket.bind(("127.0.0.2", cls.client_port))
+        cls.client_socket.bind((cls.client_ip, cls.client_port))
         cls.client_message = CoAP.Message.Message('Client')
 
         cls.running = False
@@ -94,14 +97,21 @@ class Client:
                 print("Received ", str(data), " from ", address)
                 print("Counter = ", counter)
                 cls.process_data(data)
+
                 print(data)
 
 
     @classmethod
     def process_data(cls, data):
-        header_format, encoded_json = cls.received_message.get_header_message(data)
+        cls.received_message = CoAP.Message.Message('Server')
 
+        header_format, encoded_json = cls.received_message.get_header_message(data)
+        print(header_format, encoded_json)
         cls.received_message.decode_message(header_format, encoded_json)
+
         # cls.sent_message.verify din message.py
         cls.sent_message = cls.received_message.verify_format()
         cls.data = cls.sent_message.encode_message()
+
+
+

@@ -74,17 +74,38 @@ class Message:
         self.payload = payload
 
     def verify_format(self):
+        # it works
+        encoded_json = self.get_payload()
+        command = json.loads(encoded_json)['command']
+        response = json.loads(encoded_json)['response']
+        CoAP.Interface.BaseWindow.print_message(command)
+        CoAP.Interface.BaseWindow.print_message(response)
+        print(command)
+        print(response)
+
         if self.architecture_type == 'Server':
             response = Message('Client')
 
-            response.set_msg_version(1)
-            response.set_msg_token_length(1)
-            response.set_msg_id(0xffff)
-            response.set_token(0)
-            response.set_payload_marker(0xff)
-
             # de trimis un mesaj pt ack cu confirmare de primire
             # credem ca e okay
+
+            if self.msg_type == 3:
+                if self.msg_class == 4:
+                    if self.msg_code == 0:
+                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                        CoAP.Interface.BaseWindow.print_message("400 Bad request !")
+                    if self.msg_code == 3:
+                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                        CoAP.Interface.BaseWindow.print_message("403 Forbidden !")
+                    if self.msg_code == 4:
+                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                        CoAP.Interface.BaseWindow.print_message("404 Not Found !")
+                    if self.msg_code == 5:
+                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                        CoAP.Interface.BaseWindow.print_message("405 Method Not Allowed!")
+                    if self.msg_code == 6:
+                        CoAP.Interface.BaseWindow.print_message("Eroare de client!")
+                        CoAP.Interface.BaseWindow.print_message("406 Not Acceptable !")
 
             if self.msg_type == 0:
                 #response.set_client_payload("Da, am primit mesajul","")
@@ -92,7 +113,7 @@ class Message:
                 response.set_msg_class(0)
                 response.set_msg_code(0)
                 response.set_payload_marker(0)
-                CoAP.Client.Client.send_to_server("Da, am primit mesajul", "", response)
+                CoAP.Client.Client.send_to_server("", "", response)
                 CoAP.Interface.BaseWindow.print_message("Da, am primit mesajul")
 
             if self.msg_version != 1:
@@ -151,6 +172,12 @@ class Message:
                     response.set_payload("504 Gateway Timeout!")
                     CoAP.Interface.BaseWindow.print_message("504 Gateway Timeout!")
                     return response
+
+            response.set_msg_version(1)
+            response.set_msg_token_length(1)
+            response.set_msg_id(0xffff)
+            response.set_token(0)
+            response.set_payload_marker(0xff)
 
             encoded_json = self.get_payload()
             command = json.loads(encoded_json)['command']
@@ -252,4 +279,11 @@ class Message:
     def get_payload(self):
         return self.payload
 
-
+    def print_details(self):
+        print("We are printing the message format...")
+        print("VERSION: " + str(self.get_version()))
+        print("TYPE: " + str(self.get_type()))
+        print("CLASS.CODE: " + (str(self.get_class()) + "." + str(self.get_code())))
+        print("MESSAGE ID: " + str(self.get_message_id()))
+        print("Token: " + str(self.get_token()))
+        print("Payload: " + str(self.get_payload()))
